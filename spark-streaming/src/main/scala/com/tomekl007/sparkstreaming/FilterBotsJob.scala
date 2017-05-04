@@ -3,6 +3,7 @@ package com.tomekl007.sparkstreaming
 import java.time.ZonedDateTime
 
 import com.tomekl007.sparkstreaming.config._
+import com.tomekl007.sparkstreaming.deduplication.DeduplicationService
 import com.tomekl007.sparkstreaming.ordering.StreamOrderVerification
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
@@ -35,6 +36,7 @@ class FilterBotsJob(source: DStream[PageView],
   def processPageViews(stream: DStream[PageView]): DStream[PageView] = {
 
     stream.transform(FilterBotsJob.sort(_))
+      .filter(FilterBotsJob.isNotDuplicated(_))
       .filter(record => {
         !record.url.contains("bot")
       }).cache()
@@ -44,6 +46,7 @@ class FilterBotsJob(source: DStream[PageView],
 object FilterBotsJob {
 
   val streamOrderVerification = new StreamOrderVerification()
+  val deduplicationService = new DeduplicationService()
 
   def main(args: Array[String]): Unit = {
     val stream: DStream[PageView] = DStreamProvider.providePageViews()
@@ -60,6 +63,8 @@ object FilterBotsJob {
       v.eventTime
     }, ascending = true)
   }
+
+  def isNotDuplicated(event: PageView): Boolean = !deduplicationService.isDuplicate(event)
 
   //if we want to have a strict order, we want to drop all our of order events
   def dropOutOfOrderEvents(rdd: RDD[PageView]): RDD[PageView] =

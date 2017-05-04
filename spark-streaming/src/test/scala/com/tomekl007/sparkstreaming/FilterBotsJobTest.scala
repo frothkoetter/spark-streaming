@@ -7,6 +7,7 @@ import org.apache.spark.streaming._
 import org.scalatest.Matchers._
 
 import scala.collection.mutable
+import scala.util.Random
 
 class FilterBotsJobTest extends SparkStreamingSuite {
 
@@ -17,8 +18,8 @@ class FilterBotsJobTest extends SparkStreamingSuite {
 
   test("should filter all bots PageViews") {
     //given
-    val pageView1 = PageView(1, "userId1", "www.proper-url.com", ZonedDateTime.now(ZoneOffset.UTC))
-    val pageView2 = PageView(2, "userId1", "www.bot.com", ZonedDateTime.now(ZoneOffset.UTC))
+    val pageView1 = PageView(Random.nextInt(), "userId1", "www.proper-url.com", ZonedDateTime.now(ZoneOffset.UTC))
+    val pageView2 = PageView(Random.nextInt(), "userId1", "www.bot.com", ZonedDateTime.now(ZoneOffset.UTC))
     val input = Seq(pageView1, pageView2)
     val expectedOutput: Array[PageView] = Array(
       pageView1
@@ -39,9 +40,9 @@ class FilterBotsJobTest extends SparkStreamingSuite {
   test("should process all PageViews and sort them") {
     //given
     val pageView1 =
-      PageView(1, "userId1", "www.proper-url.com", ZonedDateTime.now(ZoneOffset.UTC))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com", ZonedDateTime.now(ZoneOffset.UTC))
     val pageView2 =
-      PageView(2, "userId1", "www.proper-url.com/login", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(1))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com/login", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(1))
 
     val input = spark.makeRDD(Seq(pageView2, pageView1))
 
@@ -53,9 +54,9 @@ class FilterBotsJobTest extends SparkStreamingSuite {
 
     //and
     val pageView3 =
-      PageView(3, "userId1", "www.proper-url.com/buy", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(6))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com/buy", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(6))
     val pageView4 =
-      PageView(4, "userId1", "www.proper-url.com/item/1", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(5))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com/item/1", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(5))
 
 
     val input2 = spark.makeRDD(Seq(pageView3, pageView4))
@@ -72,9 +73,9 @@ class FilterBotsJobTest extends SparkStreamingSuite {
   test("should drop all not-in-order pageViews") {
     //given
     val pageView3 =
-      PageView(3, "userId1", "www.proper-url.com/buy", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(6))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com/buy", ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(6))
     val pageView4 =
-      PageView(4, "userId1", "www.proper-url.com/item/1", ZonedDateTime.now(ZoneOffset.UTC))
+      PageView(Random.nextInt(), "userId1", "www.proper-url.com/item/1", ZonedDateTime.now(ZoneOffset.UTC))
 
     //when
     val sorted = FilterBotsJob.dropOutOfOrderEvents(spark.makeRDD(List(pageView3))).collect().toList
@@ -90,6 +91,30 @@ class FilterBotsJobTest extends SparkStreamingSuite {
     //then
     sorted2 should contain theSameElementsAs List()
 
+  }
+
+  test("should filter all bots PageViews and do not process duplicates (important when source works in at least once delivery)") {
+    //given
+    val duplicateEventTime = ZonedDateTime.now(ZoneOffset.UTC)
+    val duplicatedId = Random.nextInt()
+    val pageView1 = PageView(duplicatedId, "userId1", "www.proper-url.com", duplicateEventTime)
+    val pageView1Duplicated = PageView(duplicatedId, "userId1", "www.proper-url.com", duplicateEventTime)
+    val pageView2 = PageView(Random.nextInt(), "userId1", "www.bot.com", ZonedDateTime.now(ZoneOffset.UTC))
+    val input = Seq(pageView1, pageView1Duplicated, pageView2)
+    val expectedOutput: Array[PageView] = Array(
+      pageView1
+    )
+
+    val pageViews = mutable.Queue[RDD[PageView]]()
+    val streamingResults = mutable.ListBuffer.empty[Array[(PageView)]]
+    val results = underTest.processPageViews(ssc.queueStream(pageViews))
+    results.foreachRDD((rdd: RDD[(PageView)], time: Time) => streamingResults += rdd.collect)
+
+    ssc.start()
+
+    //when
+    pageViews += spark.makeRDD(input)
+    assertInputMatchExpected(streamingResults, expectedOutput)
   }
 
 }
