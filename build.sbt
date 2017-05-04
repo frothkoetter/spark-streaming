@@ -1,4 +1,4 @@
-name := "top-words-counter-root"
+name := "spark-streaming"
 
 lazy val commonSettings = Seq(
   version := "0.1",
@@ -25,7 +25,12 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "2.2.5" % "test",
     "org.apache.spark" %% "spark-core" % "1.6.1" % "provided",
-    "commons-logging" % "commons-logging" % "1.2"
+    "org.apache.spark" %% "spark-streaming-kafka" % "1.6.1",
+    "org.apache.spark" %% "spark-streaming" % "1.6.1",
+    "org.apache.kafka" % "kafka-clients" % "0.8.2.1",
+    "org.apache.kafka" %% "kafka" % "0.8.2.0",
+    "commons-logging" % "commons-logging" % "1.2",
+    "net.ceedubs" %% "ficus" % "1.0.1"
   ) map (_.excludeAll(
     ExclusionRule(organization = "org.slf4j"),
     ExclusionRule(organization = "log4j"),
@@ -44,11 +49,10 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = (project in file("."))
-  .aggregate(`top-words-counter`)
+lazy val root = (project in file(".")).aggregate("spark-streaming")
 
 
-lazy val `top-words-counter` = project.in(file("top-words-counter"))
+lazy val `spark-streaming` = project.in(file("spark-streaming"))
   .settings(commonSettings: _*)
 
 
