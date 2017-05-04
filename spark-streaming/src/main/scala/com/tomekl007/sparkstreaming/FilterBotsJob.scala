@@ -5,6 +5,7 @@ import java.time.ZonedDateTime
 import com.tomekl007.sparkstreaming.config._
 import com.tomekl007.sparkstreaming.deduplication.DeduplicationService
 import com.tomekl007.sparkstreaming.ordering.StreamOrderVerification
+import com.tomekl007.sparkstreaming.pageviewcounter.PageViewCounterService
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
@@ -13,7 +14,7 @@ import scala.concurrent.duration._
 
 
 class FilterBotsJob(source: DStream[PageView],
-                    pageViewsSink: DStreamSink[PageView])
+                    pageViewsSink: DStreamSink[PageViewWithViewCounter])
   extends SparkStreamingApplication {
 
   override def sparkAppName: String = "filter_bots_job"
@@ -28,18 +29,20 @@ class FilterBotsJob(source: DStream[PageView],
   }
 
   def processStream(ssc: StreamingContext, stream: DStream[PageView],
-                    sink: DStreamSink[PageView]): Unit = {
+                    sink: DStreamSink[PageViewWithViewCounter]): Unit = {
     val streamWithTaggedRecords = processPageViews(stream)
     sink.write(ssc, streamWithTaggedRecords)
   }
 
-  def processPageViews(stream: DStream[PageView]): DStream[PageView] = {
+  def processPageViews(stream: DStream[PageView]): DStream[PageViewWithViewCounter] = {
 
-    stream.transform(FilterBotsJob.sort(_))
+    stream
+      .transform(FilterBotsJob.sort(_))
       .filter(FilterBotsJob.isNotDuplicated(_))
       .filter(record => {
         !record.url.contains("bot")
-      }).cache()
+      })
+      .map(rdd => FilterBotsJob.countOccurrences(rdd))
   }
 }
 
@@ -47,10 +50,11 @@ object FilterBotsJob {
 
   val streamOrderVerification = new StreamOrderVerification()
   val deduplicationService = new DeduplicationService()
+  val pageViewCounterService = new PageViewCounterService()
 
   def main(args: Array[String]): Unit = {
     val stream: DStream[PageView] = DStreamProvider.providePageViews()
-    val sink: DStreamSink[PageView] = new DStreamSink()
+    val sink: DStreamSink[PageViewWithViewCounter] = new DStreamSink()
 
     val job = new FilterBotsJob(stream, sink)
 
@@ -69,6 +73,11 @@ object FilterBotsJob {
   //if we want to have a strict order, we want to drop all our of order events
   def dropOutOfOrderEvents(rdd: RDD[PageView]): RDD[PageView] =
     rdd.filter(streamOrderVerification.isInOrder)
+
+  def countOccurrences(event: PageView): PageViewWithViewCounter = {
+    val count = pageViewCounterService.count(event)
+    PageViewWithViewCounter.withVisitCount(event, count)
+  }
 
 }
 
