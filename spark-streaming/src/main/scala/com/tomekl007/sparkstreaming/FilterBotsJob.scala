@@ -13,8 +13,7 @@ import org.apache.spark.streaming.dstream.DStream
 import scala.concurrent.duration._
 
 
-class FilterBotsJob(source: DStream[PageView],
-                    pageViewsSink: DStreamSink[PageViewWithViewCounter])
+class FilterBotsJob()
   extends SparkStreamingApplication {
 
   override def sparkAppName: String = "filter_bots_job"
@@ -24,7 +23,10 @@ class FilterBotsJob(source: DStream[PageView],
 
   def start(): Unit = {
     withSparkStreamingContext { ssc =>
-      processStream(ssc, source, pageViewsSink)
+      val stream: DStream[PageView] = DStreamProvider.providePageViews(ssc)
+      val sink: DStreamSink[PageViewWithViewCounter] = new DStreamSink()
+
+      processStream(ssc, stream, sink)
     }
   }
 
@@ -53,10 +55,7 @@ object FilterBotsJob {
   val pageViewCounterService = new PageViewCounterService()
 
   def main(args: Array[String]): Unit = {
-    val stream: DStream[PageView] = DStreamProvider.providePageViews()
-    val sink: DStreamSink[PageViewWithViewCounter] = new DStreamSink()
-
-    val job = new FilterBotsJob(stream, sink)
+    val job = new FilterBotsJob()
 
     job.start()
   }

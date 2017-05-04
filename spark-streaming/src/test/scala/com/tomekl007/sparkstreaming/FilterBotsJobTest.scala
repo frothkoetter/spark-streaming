@@ -12,7 +12,7 @@ import scala.util.Random
 
 class FilterBotsJobTest extends SparkStreamingSuite {
 
-  private val underTest = new FilterBotsJob(null, null)
+  private val underTest = new FilterBotsJob()
 
   override def appName: String = this.getClass.getSimpleName
 
