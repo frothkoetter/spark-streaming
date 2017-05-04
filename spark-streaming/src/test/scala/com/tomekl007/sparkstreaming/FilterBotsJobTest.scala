@@ -1,5 +1,7 @@
 package com.tomekl007.sparkstreaming
 
+import java.time.{ZoneOffset, ZonedDateTime}
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 
@@ -12,10 +14,10 @@ class FilterBotsJobTest extends SparkStreamingSuite {
   override def appName: String = this.getClass.getSimpleName
 
 
-  test("should classify all PV records properly in two batches") {
+  test("should filter all bots PageViews") {
     //given
-    val pageView1 = PageView("1", "www.proper-url.com")
-    val pageView2 = PageView("2", "www.bot.com")
+    val pageView1 = PageView(1, "userId1", "www.proper-url.com", ZonedDateTime.now(ZoneOffset.UTC))
+    val pageView2 = PageView(2, "userId1", "www.bot.com", ZonedDateTime.now(ZoneOffset.UTC))
     val input = Seq(pageView1, pageView2)
     val expectedOutput: Array[PageView] = Array(
       pageView1

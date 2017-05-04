@@ -1,3 +1,5 @@
 package com.tomekl007.sparkstreaming
 
-case class PageView(id: String, url: String)
+import java.time.ZonedDateTime
+
+case class PageView(pageViewId: Int, userId: String, url: String, eventTime: ZonedDateTime)

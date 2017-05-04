@@ -14,7 +14,7 @@ class FilterBotsJob(source: DStream[PageView],
   override def sparkAppName: String = "filter_bots_job"
 
   override def sparkStreamingConfig: SparkStreamingApplicationConfig =
-    SparkStreamingApplicationConfig(Duration(5, SECONDS), "file://\"${java.io.tmpdir}")
+    SparkStreamingApplicationConfig(Duration(2, SECONDS), "file://\"${java.io.tmpdir}")
 
   def start(): Unit = {
     withSparkStreamingContext { ssc =>
