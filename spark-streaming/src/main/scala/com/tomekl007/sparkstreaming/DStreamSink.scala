@@ -10,7 +10,7 @@ import org.apache.spark.streaming.dstream.DStream
 class DStreamSink[T] {
   def write(ssc: StreamingContext, result: DStream[PageViewWithViewCounter]) = {
     val kafkaProducer: Producer[Array[Byte], PageViewWithViewCounter] =
-      new KafkaProducer[Array[Byte], PageViewWithViewCounter](new Properties())
+      new KafkaProducer[Array[Byte], PageViewWithViewCounter](new Properties())//supply real kafka config
 
     val producerVar = ssc.sparkContext.broadcast(kafkaProducer)
     val topicVar = ssc.sparkContext.broadcast("output_topic_name")
