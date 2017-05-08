@@ -19,7 +19,7 @@ class FilterBotsJob()
   override def sparkAppName: String = "filter_bots_job"
 
   override def sparkStreamingConfig: SparkStreamingApplicationConfig =
-    SparkStreamingApplicationConfig(Duration(2, SECONDS), "file://\"${java.io.tmpdir}")
+    SparkStreamingApplicationConfig(Duration(2, SECONDS), "file://temporary-directory}")
   //when running on the cluster the Checkpointing dir should be on hdfs
 
   def start(): Unit = {
