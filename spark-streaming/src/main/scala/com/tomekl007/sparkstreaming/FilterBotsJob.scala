@@ -38,14 +38,13 @@ class FilterBotsJob()
   }
 
   def processPageViews(stream: DStream[PageView]): DStream[PageViewWithViewCounter] = {
-
     stream
       .transform(FilterBotsJob.sort(_))
       .filter(FilterBotsJob.isNotDuplicated(_))
       .filter(record => {
         !record.url.contains("bot")
       })
-      .map(rdd => FilterBotsJob.countOccurrences(rdd))
+      .map(pageView => FilterBotsJob.countOccurrences(pageView))
   }
 }
 
