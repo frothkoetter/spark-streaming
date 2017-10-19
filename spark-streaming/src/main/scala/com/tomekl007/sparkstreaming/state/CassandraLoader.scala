@@ -22,9 +22,9 @@ class CassandraLoader(val session: Session) {
       session.execute(s"insert into userevent (id, data, isLast) " +
         s"values (${
           e.id
-        }, ${
+        }, '${
           e.data
-        }, ${
+        }', ${
           e.isLast
         })")
     })
