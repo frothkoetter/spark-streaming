@@ -32,6 +32,7 @@ trait SparkStreamingSuite extends FunSuite with BeforeAndAfter with Eventually {
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
     ssc = new StreamingContext(conf, batchDuration)
+    ssc.checkpoint("file:///tmp/temporary-directory")
 
     spark = ssc.sparkContext
     clock = new ClockWrapper(ssc)

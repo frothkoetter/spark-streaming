@@ -30,7 +30,9 @@ lazy val commonSettings = Seq(
     "org.apache.kafka" % "kafka-clients" % "0.8.2.1",
     "org.apache.kafka" %% "kafka" % "0.8.2.0",
     "commons-logging" % "commons-logging" % "1.2",
-    "net.ceedubs" %% "ficus" % "1.0.1"
+    "net.ceedubs" %% "ficus" % "1.0.1",
+    "com.datastax.cassandra" % "cassandra-driver-core" % "3.3.0",
+    "com.datastax.cassandra" % "cassandra-driver-mapping" % "3.3.0"
   ) map (_.excludeAll(
     ExclusionRule(organization = "org.slf4j"),
     ExclusionRule(organization = "log4j"),
