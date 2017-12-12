@@ -17,7 +17,8 @@ object DStreamProvider {
   )
 
   def provideUserEvents(ssc: StreamingContext): DStream[UserEvent] = {
-    KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, properties, Set("user_event"))
+    KafkaUtils.createDirectStream[String, String,
+      StringDecoder, StringDecoder](ssc, properties, Set("user_event"))
       .map(deserializeToUserEvent)
 
   }
