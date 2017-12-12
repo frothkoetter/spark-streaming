@@ -57,4 +57,29 @@ class WordCountStreamingTest extends SparkStreamingSuite {
     assertInputMatchExpected(streamingResults, expectedOutput)
 
   }
+
+
+  test("should join two streams ") {
+    val conf = new SparkConf().setMaster(s"local[2]").setAppName("word-count-app")
+
+    val expectedOutput: Array[(Int, (String, Double))] = Array(
+      1 -> ("1st Street", 10.23)
+    )
+
+
+    val addresses = mutable.Queue[RDD[(Int, String)]]()
+    val transactions = mutable.Queue[RDD[(Int, Double)]]()
+
+    val streamingResults = mutable.ListBuffer.empty[Array[(Int, (String, Double))]]
+    val joined = ssc.queueStream(addresses).map { case (id, street) => (id, street) }
+      .join(ssc.queueStream(transactions))
+
+    joined.foreachRDD((rdd: RDD[(Int, (String, Double))], time: Time) => streamingResults += rdd.collect)
+
+    ssc.start()
+    addresses += spark.makeRDD(List(1 -> "1st Street"))
+    transactions += spark.makeRDD(List(1 -> 10.23, 2 -> 123.2))
+    assertInputMatchExpected(streamingResults, expectedOutput)
+
+  }
 }
