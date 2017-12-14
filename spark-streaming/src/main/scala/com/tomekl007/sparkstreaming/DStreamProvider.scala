@@ -10,7 +10,7 @@ import org.codehaus.jackson.map.ObjectMapper
 
 object DStreamProvider {
   private val properties = Map(
-    "bootstrap.servers" -> "broker1:9092,broker2:9092", //set your prod env configuration
+    "bootstrap.servers" -> "localhost:9091", //set your prod env configuration
     "group.id" -> "bots-filtering",
     "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
     "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer"
@@ -31,7 +31,7 @@ object DStreamProvider {
       ssc,
       properties,
       Map("page_views" -> 1),
-      StorageLevel.MEMORY_ONLY
+      StorageLevel.MEMORY_AND_DISK
     ).map(deserializeToPageView)
 
   }
