@@ -2,14 +2,15 @@ package com.tomekl007.sparkstreaming
 
 import java.util.Properties
 
+import com.tomekl007.WithUserId
 import org.apache.kafka.clients.producer._
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import org.codehaus.jackson.map.ObjectMapper
 
 
-class DStreamSink[T] {
-  def write(ssc: StreamingContext, result: DStream[PageViewWithViewCounter]) = {
+class DStreamSink[T <: WithUserId] {
+  def write(ssc: StreamingContext, result: DStream[T]) = {
     val properties = new Properties() //supply your real kafka config
     properties.put("bootstrap.servers", "broker1:9092,broker2:9092")
     properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
@@ -31,7 +32,7 @@ class DStreamSink[T] {
           new ProducerRecord(
             topic,
             record.userId,
-            objectMapperVar.value.writeValueAsString(record)//in production ready app consider using avro format
+            objectMapperVar.value.writeValueAsString(record) //in production ready app consider using avro format
           ),
           new KafkaCallbackHandler()
         )

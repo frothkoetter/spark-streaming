@@ -1,5 +1,6 @@
 package com.tomekl007.sparkstreaming
 
+import com.tomekl007.sparkstreaming.abandonedCart.CartEvent
 import com.tomekl007.sparkstreaming.state.UserEvent
 import kafka.serializer.{DefaultDecoder, StringDecoder}
 import org.apache.spark.storage.StorageLevel
@@ -36,11 +37,22 @@ object DStreamProvider {
 
   }
 
+  def provideCartEvents(ssc: StreamingContext): DStream[CartEvent] = {
+    KafkaUtils.createDirectStream[String, String,
+      StringDecoder, StringDecoder](ssc, properties, Set("cart_event"))
+      .map(deserializeToCartEvent)
+  }
+
+
   def deserializeToPageView(tuple: (String, String)): PageView = {
     objectMapper.readValue(tuple._2, classOf[PageView]) //in prod it should be binary format, for example avro
   }
 
   def deserializeToUserEvent(tuple: (String, String)): UserEvent = {
     objectMapper.readValue(tuple._2, classOf[UserEvent])
+  }
+
+  def deserializeToCartEvent(tuple: (String, String)): CartEvent = {
+    objectMapper.readValue(tuple._2, classOf[CartEvent])
   }
 }
