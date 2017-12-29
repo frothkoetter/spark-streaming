@@ -1,4 +1,4 @@
-package com.tomekl007.sparkstreaming
+package com.tomekl007.sink
 
 import java.util.Properties
 
@@ -9,7 +9,7 @@ import org.apache.spark.streaming.dstream.DStream
 import org.codehaus.jackson.map.ObjectMapper
 
 
-class DStreamSink[T <: WithUserId] {
+class DStreamKafkaSink[T <: WithUserId] extends Sink[T] {
   def write(ssc: StreamingContext, result: DStream[T]) = {
     val properties = new Properties() //supply your real kafka config
     properties.put("bootstrap.servers", "broker1:9092,broker2:9092")

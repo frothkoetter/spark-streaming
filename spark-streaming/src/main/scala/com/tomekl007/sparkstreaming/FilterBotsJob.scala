@@ -2,10 +2,12 @@ package com.tomekl007.sparkstreaming
 
 import java.time.ZonedDateTime
 
+import com.tomekl007.sink.{DStreamKafkaSink, HDFSSink}
 import com.tomekl007.sparkstreaming.config._
 import com.tomekl007.sparkstreaming.deduplication.DeduplicationService
 import com.tomekl007.sparkstreaming.ordering.StreamOrderVerification
 import com.tomekl007.sparkstreaming.pageviewcounter.PageViewCounterService
+import org.apache.hadoop.fs.Hdfs
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
@@ -25,14 +27,14 @@ class FilterBotsJob()
   def start(): Unit = {
     withSparkStreamingContext { ssc =>
       val stream: DStream[PageView] = DStreamProvider.providePageViews(ssc)
-      val sink: DStreamSink[PageViewWithViewCounter] = new DStreamSink()
+      val sink: HDFSSink[PageViewWithViewCounter] = new HDFSSink()
 
       processStream(ssc, stream, sink)
     }
   }
 
   def processStream(ssc: StreamingContext, stream: DStream[PageView],
-                    sink: DStreamSink[PageViewWithViewCounter]): Unit = {
+                    sink: HDFSSink[PageViewWithViewCounter]): Unit = {
     val streamWithTaggedRecords = processPageViews(stream)
     sink.write(ssc, streamWithTaggedRecords)
   }

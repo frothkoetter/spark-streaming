@@ -1,7 +1,8 @@
 package com.tomekl007.sparkstreaming.financial
 
+import com.tomekl007.sink.DStreamKafkaSink
 import com.tomekl007.sparkstreaming.config.{SparkStreamingApplication, SparkStreamingApplicationConfig}
-import com.tomekl007.sparkstreaming.{DStreamProvider, DStreamSink}
+import com.tomekl007.sparkstreaming.DStreamProvider
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 
@@ -18,14 +19,14 @@ class PaymentAnalyzer extends SparkStreamingApplication {
   def start(): Unit = {
     withSparkStreamingContext { ssc =>
       val stream: DStream[Payment] = DStreamProvider.paymentProvider(ssc)
-      val sink: DStreamSink[PaymentValidated] = new DStreamSink()
+      val sink: DStreamKafkaSink[PaymentValidated] = new DStreamKafkaSink()
 
       processStream(ssc, stream, sink)
     }
   }
 
   def processStream(ssc: StreamingContext, stream: DStream[Payment],
-                    sink: DStreamSink[PaymentValidated]): Unit = {
+                    sink: DStreamKafkaSink[PaymentValidated]): Unit = {
     val result = processPayments(stream)
     sink.write(ssc, result)
   }

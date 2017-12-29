@@ -1,5 +1,6 @@
 package com.tomekl007.sparkstreaming.abandonedCart
 
+import com.tomekl007.sink.DStreamKafkaSink
 import com.tomekl007.sparkstreaming._
 import com.tomekl007.sparkstreaming.config.{SparkStreamingApplication, SparkStreamingApplicationConfig}
 import org.apache.spark.streaming.StreamingContext
@@ -19,14 +20,14 @@ class AbandonedCartJob extends SparkStreamingApplication {
   def start(): Unit = {
     withSparkStreamingContext { ssc =>
       val stream: DStream[CartEvent] = DStreamProvider.provideCartEvents(ssc)
-      val sink: DStreamSink[AbandonedCartNotification] = new DStreamSink()
+      val sink: DStreamKafkaSink[AbandonedCartNotification] = new DStreamKafkaSink()
 
       processStream(ssc, stream, sink)
     }
   }
 
   def processStream(ssc: StreamingContext, stream: DStream[CartEvent],
-                    sink: DStreamSink[AbandonedCartNotification]): Unit = {
+                    sink: DStreamKafkaSink[AbandonedCartNotification]): Unit = {
     val result = processAbandonedCart(stream)
     sink.write(ssc, result)
   }

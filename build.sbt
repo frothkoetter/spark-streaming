@@ -32,7 +32,10 @@ lazy val commonSettings = Seq(
     "commons-logging" % "commons-logging" % "1.2",
     "net.ceedubs" %% "ficus" % "1.0.1",
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.3.0",
-    "com.datastax.cassandra" % "cassandra-driver-mapping" % "3.3.0"
+    "com.datastax.cassandra" % "cassandra-driver-mapping" % "3.3.0",
+    "org.apache.hbase" % "hbase-client" % "1.3.0",
+    "org.apache.hbase" % "hbase" % "1.3.0" pomOnly()
+
   ) map (_.excludeAll(
     ExclusionRule(organization = "org.slf4j"),
     ExclusionRule(organization = "log4j"),
@@ -51,10 +54,14 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = (project in file(".")).aggregate("spark-streaming")
+lazy val root = (project in file(".")).aggregate(`spark-streaming`, `avro-dto`)
 
+lazy val `avro-dto` = project.in(file("avro-dto"))
+  .settings(commonSettings: _*)
+  .settings(publishArtifact in(Compile, packageDoc) := false)
 
 lazy val `spark-streaming` = project.in(file("spark-streaming"))
+  .dependsOn(`avro-dto`)
   .settings(commonSettings: _*)
 
 
