@@ -16,7 +16,7 @@ class HDFSSinkTest extends SparkSuite with BeforeAndAfter with HdfsTestFileSyste
   test("saves and loads data") {
     implicit def fileSystem: FileSystem = FileSystem.getLocal(new Configuration())
 
-    val traits = List(
+    val pv = List(
       PageViewWithViewCounter.newBuilder()
         .setUserId("uid1")
         .setPageViewId(1)
@@ -25,7 +25,7 @@ class HDFSSinkTest extends SparkSuite with BeforeAndAfter with HdfsTestFileSyste
         .setUrl("www.a.com")
         .setViewsCounter(12)
         .build())
-    val rdd = spark.parallelize(traits)
+    val rdd = spark.parallelize(pv)
 
     new HDFSSink().save(spark, PageViewWithViewCounter.SCHEMA$, rdd, testPath("test"))
 

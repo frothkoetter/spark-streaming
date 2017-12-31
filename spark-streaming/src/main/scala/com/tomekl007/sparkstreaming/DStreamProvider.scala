@@ -13,7 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper
 object DStreamProvider {
   private val properties = Map(
     "bootstrap.servers" -> "localhost:9091", //set your prod env configuration
-    "group.id" -> "bots-filtering",
+    "group.id" -> "payment-processor",
     "key.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer",
     "value.deserializer" -> "org.apache.kafka.common.serialization.StringDeserializer"
   )
@@ -46,7 +46,7 @@ object DStreamProvider {
 
   def paymentProvider(ssc: StreamingContext): DStream[Payment] = {
     KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
-      ssc, properties, Set("cart_event"))
+      ssc, properties, Set("payment"))
       .map(deserialzieToPayment)
   }
 

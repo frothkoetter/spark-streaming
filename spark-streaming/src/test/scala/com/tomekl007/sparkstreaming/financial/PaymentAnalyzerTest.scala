@@ -17,7 +17,7 @@ class PaymentAnalyzerTest extends SparkStreamingSuite {
     val p1 = Payment("1", "2", 12.2)
     val p2 = Payment("1", "666", 23.2)
     val p3 = Payment("666", "1", 23.2)
-    val p4 = Payment("1", "666", -23.2)
+    val p4 = Payment("1", "2", -23.2)
 
     val input = Seq(p1, p2, p3, p4)
     val expectedOutput: Array[PaymentValidated] = Array(
