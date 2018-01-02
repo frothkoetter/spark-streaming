@@ -47,8 +47,9 @@ trait SparkStreamingSuite extends FunSuite with BeforeAndAfter with Eventually {
 
 
   def assertInputMatchExpected[T](result : mutable.ListBuffer[Array[T]],
-                                  expected: Array[T]): Unit = {
-    assertInputMatchExpected(result, expected, 10 seconds)
+                                  expected: Array[T],
+                                  timeout: FiniteDuration = 10 seconds): Unit = {
+    assertInputMatchExpected(result, expected, timeout)
   }
 
   def assertInputMatchExpected[T](result : mutable.ListBuffer[Array[T]],

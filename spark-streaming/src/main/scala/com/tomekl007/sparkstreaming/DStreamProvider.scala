@@ -3,6 +3,7 @@ package com.tomekl007.sparkstreaming
 import com.tomekl007.sparkstreaming.abandonedCart.CartEvent
 import com.tomekl007.sparkstreaming.financial.Payment
 import com.tomekl007.sparkstreaming.state.UserEvent
+import com.tomekl007.sparkstreaming.transactions.Transaction
 import kafka.serializer.{DefaultDecoder, StringDecoder}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
@@ -65,6 +66,16 @@ object DStreamProvider {
 
   def deserialzieToPayment(tuple: (String, String)): Payment = {
     objectMapper.readValue(tuple._2, classOf[Payment])
+  }
+
+  def transactions(ssc: StreamingContext): DStream[Transaction] = {
+    KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
+      ssc, properties, Set("transactions"))
+      .map(deserializeToTransaction)
+  }
+
+  def deserializeToTransaction(tuple: (String, String)): Transaction = {
+    objectMapper.readValue(tuple._2, classOf[Transaction])
   }
 
 

@@ -1,14 +1,14 @@
 package com.tomekl007.sparkstreaming.financial
 
-import com.tomekl007.WithUserId
+import com.tomekl007.{WithId, WithUserId}
 
 case class Payment(userId: String, to: String, amount: BigDecimal) extends WithUserId
 
-case class PaymentValidated(userId: String,
+case class PaymentValidated(id: String,
                             to: String,
                             amount: BigDecimal
                            )
-  extends WithUserId
+  extends WithId
 
 object PaymentValidated {
   def fromPayment: (Payment) => PaymentValidated = {
