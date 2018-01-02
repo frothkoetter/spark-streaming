@@ -6,7 +6,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{SparkStreamingSuite, Time}
 
 import scala.collection.mutable
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class FindTopSellerJobTest extends SparkStreamingSuite {
@@ -38,7 +37,7 @@ class FindTopSellerJobTest extends SparkStreamingSuite {
 
     //when
     transactions += spark.makeRDD(input)
-    assertInputMatchExpected(streamingResults, expectedOutput, timeout = 15 seconds)//timeout need to be > than window size
+    assertInputMatchExpected(streamingResults, expectedOutput)
 
   }
 
@@ -64,7 +63,7 @@ class FindTopSellerJobTest extends SparkStreamingSuite {
 
     //when
     transactions += spark.makeRDD(input)
-    assertInputMatchExpected(streamingResults, expectedOutput, timeout = 15 seconds)//timeout need to be > than window size
+    assertInputMatchExpected(streamingResults, expectedOutput)
 
   }
 
