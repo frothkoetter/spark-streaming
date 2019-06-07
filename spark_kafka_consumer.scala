@@ -62,7 +62,6 @@ stream.foreachRDD { rdd =>
   wordCountsDataFrame.show()
 }
 
-
 ssc.start
 
 // the above code is printing out topic details every 5 seconds
