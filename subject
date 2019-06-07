@@ -1,0 +1,10 @@
+# spark-streaming
+
+Install as root user the generate.sh file - nicely create kafka topics and download the simulator Java programm and starts
+it --- three instances for minifi started topic ingest EU raw generates approx 400 events per 10 seconds
+
+run Spark-shell for Scala and --package .... to download
+
+runs in interactive mode
+
+to stop CNTRL-D or type in at scala> ssc.stop(stopSparkContext = false)
